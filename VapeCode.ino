@@ -53,7 +53,7 @@ void loop(){
   
   walk_animation();
   frame++;
-  delay(100);
+  delay(50);
 }
 
 void run_animation(){
