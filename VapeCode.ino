@@ -42,17 +42,15 @@ void setup(){
   tft.init();
   tft.setRotation(270);
   ///////////// CREATE THE SKY ////////////////////
-  int half_height = tft.height() / 2;
-  int blend_zone_height = 20;
+ int half_height = tft.height() / 2;
+  uint16_t light_blue_top = tft.color565(67, 184, 239);
+  uint16_t white_bottom = TFT_WHITE;
 
-  // A palette with soft orange for a warm, contrasting sunset
-  uint16_t soft_peach = tft.color565(255, 218, 185); // Soft, warm peach
-  uint16_t soft_coral = tft.color565(240, 128, 128); // Gentle coral tone
-
-  tft.fillRectVGradient(0, 0, tft.width(), half_height, soft_peach, soft_coral);
-  tft.fillRectVGradient(0, half_height, tft.width(), blend_zone_height, soft_coral, TFT_WHITE);
-  tft.fillRect(0, half_height + blend_zone_height, tft.width(), tft.height() - (half_height + blend_zone_height), TFT_WHITE);
-
+  // Fill the bottom half with a solid white color
+  tft.fillRect(0, half_height, tft.width(), tft.height() - half_height, white_bottom);
+  
+  // Draw the gradient in the top half, starting with white at the bottom and transitioning to blue at the top
+  tft.fillRectVGradient(0, 0, tft.width(), half_height, light_blue_top, white_bottom);
   //////////////////////////////////
 
   // tft.fillScreen(TFT_WHITE);
@@ -65,10 +63,8 @@ void setup(){
   sprite.setSwapBytes(true);
   text_sprite.createSprite(scaledvhwid,scaledvhhei);
   drawImageScaled(&text_sprite, epd_bitmap_vibiesthorsetext, 0, 0, vhwid, vhhei, vhsca, 0, vhwid);
-  // drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH);
-
-  // text_sprite.pushImage(0, 0, vhwid, vhhei, epd_bitmap_vibiesthorsetext);
-  text_sprite.pushSprite(25, 10,TFT_WHITE);
+  //text_sprite.pushSprite(25, 10,TFT_WHITE);
+  text_sprite.pushSprite(25, 10);
 
 }
 
