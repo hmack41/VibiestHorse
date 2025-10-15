@@ -86,7 +86,9 @@ void run_animation(){
 
 void walk_animation(){
   anim_frame = frame%8;
-  int image_x_offset = (anim_frame * HORSE_FRAME_WIDTH)+(5*SCALE);
+  // int anim_frame = (ANIM_FRAME_COUNT - 1) - (frame % ANIM_FRAME_COUNT);
+  int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
+  image_x_offset += 16;
   sprite.fillSprite(TFT_WHITE);
   // sprite.pushImage(-1*(anim_frame*64),0,512,36,epd_bitmap_Light_Blue_Horse);
   drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
