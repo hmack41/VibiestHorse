@@ -4,6 +4,7 @@
 #include "horseimage.h"
 #include "horseimagerun.h"
 #include "grass.h"
+#include "heart.h"
 
 // TFT and Sprite objects
 TFT_eSPI tft = TFT_eSPI();
