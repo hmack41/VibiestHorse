@@ -3,6 +3,7 @@
 #include "vibiesthorsetext.h"
 #include "horseimage.h"
 #include "horseimagerun.h"
+#include "grass.h"
 
 // TFT and Sprite objects
 TFT_eSPI tft = TFT_eSPI();
@@ -13,10 +14,12 @@ TFT_eSprite text_sprite = TFT_eSprite(&tft); // Used for the text
 const int HORSE_SHEET_WIDTH = 512;
 const int HORSE_SHEET_HEIGHT = 36;
 const int HORSE_FRAME_WIDTH = 64; // Each frame of the horse is 64 pixels wide
+const int HORSE_FRAME_WIDTH_MINI = 36;
 const int SCALE = 3;
 const int ANIM_FRAME_COUNT = 8; // Total animation frames
-const int SCALED_SPRITE_WIDTH = HORSE_FRAME_WIDTH * SCALE;
-const int SCALED_SPRITE_HEIGHT = HORSE_SHEET_HEIGHT * SCALE;
+const int SCALED_SPRITE_WIDTH = HORSE_FRAME_WIDTH_MINI * SCALE;
+const int SCALED_SPRITE_HEIGHT = (HORSE_SHEET_HEIGHT) * SCALE;
+const int HORSE_PRINT_HEIGHT = 180;
 
 // text definitions
 const int vhwid = 39;
@@ -24,6 +27,10 @@ const int vhhei = 15;
 const int vhsca = 5;
 const int scaledvhwid = vhwid*vhsca;
 const int scaledvhhei = vhhei*vhsca;
+
+// Grass definitions
+const int gwid  = 240;
+const int ghei  = 110;
 
 
 int anim_frame = 0;
@@ -34,26 +41,29 @@ void setup(){
 
   tft.init();
   tft.setRotation(270);
-  tft.fillScreen(TFT_GREEN);
+  tft.fillScreen(TFT_WHITE);
   tft.setTextColor(TFT_WHITE, TFT_BLACK); 
   tft.setTextSize(2); 
-  tft.setCursor(10, 10); 
+  tft.setCursor(10, 10);
+  tft.setSwapBytes(true);  
+  tft.pushImage(0,210,gwid,ghei,epd_grass);
   sprite.createSprite(SCALED_SPRITE_WIDTH, SCALED_SPRITE_HEIGHT);
   sprite.setSwapBytes(true);
   text_sprite.createSprite(scaledvhwid,scaledvhhei);
-  // drawImageScaled(&text_sprite, epd_bitmap_vibiesthorsetext, 0, 0, vhwid, vhhei, vhsca, 0, vhwid);
-  text_sprite.pushImage(0, 0, vhwid, vhhei, epd_bitmap_vibiesthorsetext);
-  text_sprite.pushSprite(10, 10,TFT_WHITE);
+  drawImageScaled(&text_sprite, epd_bitmap_vibiesthorsetext, 0, 0, vhwid, vhhei, vhsca, 0, vhwid);
+  // drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH);
+
+  // text_sprite.pushImage(0, 0, vhwid, vhhei, epd_bitmap_vibiesthorsetext);
+  text_sprite.pushSprite(25, 10,TFT_WHITE);
 
 }
 
 void loop(){
   // run_animation();
   // text_sprite.pushSprite(10, 10,TFT_WHITE);
-  
-  walk_animation();
+    walk_animation();
   frame++;
-  delay(50);
+  delay(150);
 }
 
 void run_animation(){
@@ -62,12 +72,11 @@ void run_animation(){
 
 void walk_animation(){
   anim_frame = frame%8;
-  int image_x_offset = anim_frame * HORSE_FRAME_WIDTH;
+  int image_x_offset = (anim_frame * HORSE_FRAME_WIDTH)-(16*SCALE);
   sprite.fillSprite(TFT_BLACK);
   // sprite.pushImage(-1*(anim_frame*64),0,512,36,epd_bitmap_Light_Blue_Horse);
   drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH);
-  tft.fillScreen(TFT_GREEN);
-  sprite.pushSprite(10, 150,TFT_WHITE);
+  sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
 }
 
 void drawImageScaled(TFT_eSprite *targetSprite, const uint16_t *data, int x, int y, int width, int height, int scale, int image_x_offset, int frame_width) {
