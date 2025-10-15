@@ -41,7 +41,21 @@ void setup(){
 
   tft.init();
   tft.setRotation(270);
-  tft.fillScreen(TFT_WHITE);
+  ///////////// CREATE THE SKY ////////////////////
+  int half_height = tft.height() / 2;
+  int blend_zone_height = 20;
+
+  // A palette with soft orange for a warm, contrasting sunset
+  uint16_t soft_peach = tft.color565(255, 218, 185); // Soft, warm peach
+  uint16_t soft_coral = tft.color565(240, 128, 128); // Gentle coral tone
+
+  tft.fillRectVGradient(0, 0, tft.width(), half_height, soft_peach, soft_coral);
+  tft.fillRectVGradient(0, half_height, tft.width(), blend_zone_height, soft_coral, TFT_WHITE);
+  tft.fillRect(0, half_height + blend_zone_height, tft.width(), tft.height() - (half_height + blend_zone_height), TFT_WHITE);
+
+  //////////////////////////////////
+
+  // tft.fillScreen(TFT_WHITE);
   tft.setTextColor(TFT_WHITE, TFT_BLACK); 
   tft.setTextSize(2); 
   tft.setCursor(10, 10);
@@ -72,10 +86,10 @@ void run_animation(){
 
 void walk_animation(){
   anim_frame = frame%8;
-  int image_x_offset = (anim_frame * HORSE_FRAME_WIDTH)-(16*SCALE);
-  sprite.fillSprite(TFT_BLACK);
+  int image_x_offset = (anim_frame * HORSE_FRAME_WIDTH)+(5*SCALE);
+  sprite.fillSprite(TFT_WHITE);
   // sprite.pushImage(-1*(anim_frame*64),0,512,36,epd_bitmap_Light_Blue_Horse);
-  drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH);
+  drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
   sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
 }
 
