@@ -7,21 +7,21 @@
 #include "heart.h"
 
 // TFT and Sprite objects
-TFT_eSPI tft = TFT_eSPI();
-TFT_eSprite sprite = TFT_eSprite(&tft); // Used for the horse animation
+TFT_eSPI tft            = TFT_eSPI();
+TFT_eSprite sprite      = TFT_eSprite(&tft); // Used for the horse animation
 TFT_eSprite text_sprite = TFT_eSprite(&tft); // Used for the text
-TFT_eSprite heart1 = TFT_eSprite(&tft);
-TFT_eSprite heart2 = TFT_eSprite(&tft);
-TFT_eSprite heart3 = TFT_eSprite(&tft);
-TFT_eSprite heart4 = TFT_eSprite(&tft);
+TFT_eSprite heart1      = TFT_eSprite(&tft);
+TFT_eSprite heart2      = TFT_eSprite(&tft);
+TFT_eSprite heart3      = TFT_eSprite(&tft);
+TFT_eSprite heart4      = TFT_eSprite(&tft);
 
 // Hearts
 const int HEART_SHEET_WIDTH = 45;
 const int HEART_SHEET_HEIGHT = 13;
 const int HEART_FRAME_WIDTH = 15;
-const int HEART_SCALE = 3;
+const int HEART_SCALE = 2;
 const int SCALED_HEART_WIDTH = HEART_FRAME_WIDTH * HEART_SCALE;
-const int SCALED_HEART_HEIGHT = HEART_FRAME_HEIGHT * HEART_SCALE; 
+const int SCALED_HEART_HEIGHT = HEART_SHEET_HEIGHT * HEART_SCALE; 
 
 // Image and animation frame definitions
 const int HORSE_SHEET_WIDTH = 512;
@@ -48,7 +48,7 @@ const int ghei  = 110;
 
 int anim_frame = 0;
 int frame = 0;
-int health = 100;
+int health = 55;
 
 void setup(){
 
@@ -76,12 +76,11 @@ void setup(){
   sprite.setSwapBytes(true);
   text_sprite.createSprite(scaledvhwid,scaledvhhei);
   heart1.createSprite(SCALED_HEART_WIDTH,SCALED_HEART_HEIGHT);
+  heart2.createSprite(SCALED_HEART_WIDTH,SCALED_HEART_HEIGHT);
+  heart3.createSprite(SCALED_HEART_WIDTH,SCALED_HEART_HEIGHT);
+  heart4.createSprite(SCALED_HEART_WIDTH,SCALED_HEART_HEIGHT);
   drawImageScaled(&text_sprite, epd_bitmap_vibiesthorsetext, 0, 0, vhwid, vhhei, vhsca, 0, vhwid);
-  drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, SCALED_HEART_WIDTH, SCALED_HEART_HEIGHT, HEART_SCALE, 0, SCALED_HEART_WIDTH);
-  //text_sprite.pushSprite(25, 10,TFT_WHITE);
   text_sprite.pushSprite(25, 10);
-  heart1.pushSprite(0,0);
-
 }
 
 void loop(){
@@ -104,47 +103,58 @@ void draw_heart(int health){
   int s2    = 15;
   int s3    = 30;
   int yall  = 100;
-  int scalee = 2;
-  //Heart 1
-  // if (health == 0){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
-  // if (health > 0 && health < 12.5){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
-  // if (health > 12.5){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
-  // //Heart 2
-  // if (health < 25){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
-  // if (health > 24 && health < 37.5){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
-  // if (health > 37.5){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
-  // //Heart 3
-  // if (health < 50){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
-  // if (health > 50 && health < 62.5){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
-  // if (health > 62.5){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
-  // //Heart 4
-  // if (health < 75){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
-  // if (health > 75 && health < 87.5){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
-  // if (health > 87.5){
-  //   drawImageScaled(&heart1, epd_bitmap_heart,0,yall,45,13,scalee,0,15);
-  // }
+  // Heart 1
+  if (health == 0){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 30, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x1,yall,TFT_WHITE);
+  }
+  if (health > 0 && health < 12.5){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 15, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x1,yall,TFT_WHITE);
+  }
+  if (health > 12.5){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 0, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x1,yall,TFT_WHITE);
+  }
+  // Heart 2
+  if (health < 25){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 30, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x2,yall,TFT_WHITE);
+  }
+  if (health > 24 && health < 37.5){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 15, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x2,yall,TFT_WHITE);
+  }
+  if (health > 50){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 0, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x2,yall,TFT_WHITE);
+  }
+  // Heart 3
+  if (health < 50){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 30, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x3,yall,TFT_WHITE);
+  }
+  if (health > 49 && health < 62.5){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 15, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x3,yall,TFT_WHITE);
+  }
+  if (health > 75){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 0, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x3,yall,TFT_WHITE);
+  }
+  // Heart 4
+  if (health < 75){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 30, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x4,yall,TFT_WHITE);
+  }
+  if (health > 74 && health < 87.5){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 15, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x4,yall,TFT_WHITE);
+  }
+  if (health > 87.5){
+      drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 0, HEART_SHEET_WIDTH);
+      heart1.pushSprite(x4,yall,TFT_WHITE);
+  }
 }
 
 void walk_animation(){
