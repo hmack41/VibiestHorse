@@ -10,11 +10,10 @@
 // TFT and Sprite objects
 TFT_eSPI tft            = TFT_eSPI();
 TFT_eSprite sprite      = TFT_eSprite(&tft); // Used for the horse animation
+TFT_eSprite runsprite   = TFT_eSprite(&tft);
 TFT_eSprite text_sprite = TFT_eSprite(&tft); // Used for the text
 TFT_eSprite heart1      = TFT_eSprite(&tft);
-TFT_eSprite heart2      = TFT_eSprite(&tft);
-TFT_eSprite heart3      = TFT_eSprite(&tft);
-TFT_eSprite heart4      = TFT_eSprite(&tft);
+
 
 // Hearts
 const int HEART_SHEET_WIDTH = 45;
@@ -26,12 +25,15 @@ const int SCALED_HEART_HEIGHT = HEART_SHEET_HEIGHT * HEART_SCALE;
 
 // Image and animation frame definitions
 const int HORSE_SHEET_WIDTH = 512;
+const int HORSE_RUN_SHEET_WIDTH = 384;
 const int HORSE_SHEET_HEIGHT = 36;
 const int HORSE_FRAME_WIDTH = 64; // Each frame of the horse is 64 pixels wide
 const int HORSE_FRAME_WIDTH_MINI = 36;
+const int HORSE_FRAME_WIDTH_RUN_MINI = 50;
 const int SCALE = 3;
 const int ANIM_FRAME_COUNT = 8; // Total animation frames
 const int SCALED_SPRITE_WIDTH = HORSE_FRAME_WIDTH_MINI * SCALE;
+const int SCALED_SPRITE_WIDTH_RUN = HORSE_FRAME_WIDTH_RUN_MINI * SCALE;
 const int SCALED_SPRITE_HEIGHT = (HORSE_SHEET_HEIGHT) * SCALE;
 const int HORSE_PRINT_HEIGHT = 180;
 
@@ -50,7 +52,7 @@ const int ghei  = 110;
 int anim_frame = 0;
 int frame = 0;
 int health = 55;
-
+int L_death_anim = 0;
 void setup(){
 
   tft.init();
@@ -73,37 +75,83 @@ void setup(){
   tft.setCursor(10, 10);
   tft.setSwapBytes(true);  
   tft.pushImage(0,210,gwid,ghei,epd_grass);
-  sprite.createSprite(SCALED_SPRITE_WIDTH, SCALED_SPRITE_HEIGHT);
-  sprite.setSwapBytes(true);
   text_sprite.createSprite(scaledvhwid,scaledvhhei);
-  heart1.createSprite(SCALED_HEART_WIDTH,SCALED_HEART_HEIGHT);
-  heart2.createSprite(SCALED_HEART_WIDTH,SCALED_HEART_HEIGHT);
-  heart3.createSprite(SCALED_HEART_WIDTH,SCALED_HEART_HEIGHT);
-  heart4.createSprite(SCALED_HEART_WIDTH,SCALED_HEART_HEIGHT);
   drawImageScaled(&text_sprite, epd_bitmap_vibiesthorsetext, 0, 0, vhwid, vhhei, vhsca, 0, vhwid);
   text_sprite.pushSprite(25, 10);
+  text_sprite.deleteSprite();
+  sprite.createSprite(SCALED_SPRITE_WIDTH, SCALED_SPRITE_HEIGHT);
+  sprite.setSwapBytes(true);
+  runsprite.createSprite(SCALED_SPRITE_WIDTH_RUN,SCALED_SPRITE_HEIGHT);
+  runsprite.setSwapBytes(true);
+  heart1.createSprite(SCALED_HEART_WIDTH,SCALED_HEART_HEIGHT);
 }
 
 void loop(){
+  decrement_health();
   play_animation();
   frame++;
   draw_heart(health);
   delay(150);
 }
 
+void decrement_health(){
+  if(health >0){
+  health = health -1;
+  }
+  else if (health == 1){
+    L_death_anim = 1;
+  }
+}
 
 
 void play_animation(){
   if(health > 50){
     run_animation();
   }
-  elif(health < 50 && health > 0){
+  else if(health < 50 && health > 0){
     walk_animation();
   }
-  elif(L_death_anim == 1){
+  else if(L_death_anim == 1){
     death_animation();
   }
+  if(health ==50){
+    erase_sprites();
   }
+  }
+
+  void walk_animation(){
+  anim_frame = frame%8;
+  // int anim_frame = (ANIM_FRAME_COUNT - 1) - (frame % ANIM_FRAME_COUNT);
+  int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
+  image_x_offset += 16;
+  sprite.fillSprite(TFT_WHITE);
+  drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
+  sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
+}
+
+void erase_sprites(){
+  //erase the sprites;
+}
+
+void run_animation(){
+  anim_frame = frame%6;
+  int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
+  image_x_offset += 10;
+  runsprite.fillSprite(TFT_WHITE);
+  drawImageScaled(&runsprite, epd_bitmap_Light_Blue_Horse_Run, 0, 0, HORSE_RUN_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_RUN_MINI);
+  runsprite.pushSprite(45, HORSE_PRINT_HEIGHT);
+}
+
+void death_animation(){
+  for (int i = 0; i <=8; i++){
+    anim_frame = i;
+    int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
+    image_x_offset += 16;
+    sprite.fillSprite(TFT_WHITE);
+    drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse_Die, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
+    sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
+  }
+}
 
 void draw_heart(int health){
   int x1    = 45;
@@ -168,35 +216,7 @@ void draw_heart(int health){
   }
 }
 
-void walk_animation(){
-  anim_frame = frame%8;
-  // int anim_frame = (ANIM_FRAME_COUNT - 1) - (frame % ANIM_FRAME_COUNT);
-  int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
-  image_x_offset += 16;
-  sprite.fillSprite(TFT_WHITE);
-  drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
-  sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
-}
 
-void run_animation(){
-  anim_frame = frame%6;
-  int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
-  image_x_offset += 16;
-  sprite.fillSprite(TFT_WHITE);
-  drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse_Run, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
-  sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
-}
-
-void death_animation(){
-  for (int i = 0; i <=8; i++){
-    anim_frame = i;
-    int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
-    image_x_offset += 16;
-    sprite.fillSprite(TFT_WHITE);
-    drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse_Die, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
-    sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
-  }
-}
 
 void drawImageScaled(TFT_eSprite *targetSprite, const uint16_t *data, int x, int y, int width, int height, int scale, int image_x_offset, int frame_width) {
   for (int j = 0; j < height; j++) {
