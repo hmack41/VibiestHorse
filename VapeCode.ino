@@ -5,6 +5,7 @@
 #include "horseimagerun.h"
 #include "grass.h"
 #include "heart.h"
+#include "horseimagedying.h"
 
 // TFT and Sprite objects
 TFT_eSPI tft            = TFT_eSPI();
@@ -84,15 +85,25 @@ void setup(){
 }
 
 void loop(){
-  // run_animation();
-  walk_animation();
+  play_animation();
   frame++;
   draw_heart(health);
   delay(150);
 }
 
-void run_animation(){
-}
+
+
+void play_animation(){
+  if(health > 50){
+    run_animation();
+  }
+  elif(health < 50 && health > 0){
+    walk_animation();
+  }
+  elif(L_death_anim == 1){
+    death_animation();
+  }
+  }
 
 void draw_heart(int health){
   int x1    = 45;
@@ -163,9 +174,28 @@ void walk_animation(){
   int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
   image_x_offset += 16;
   sprite.fillSprite(TFT_WHITE);
-  // sprite.pushImage(-1*(anim_frame*64),0,512,36,epd_bitmap_Light_Blue_Horse);
   drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
   sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
+}
+
+void run_animation(){
+  anim_frame = frame%6;
+  int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
+  image_x_offset += 16;
+  sprite.fillSprite(TFT_WHITE);
+  drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse_Run, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
+  sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
+}
+
+void death_animation(){
+  for (int i = 0; i <=8; i++){
+    anim_frame = i;
+    int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
+    image_x_offset += 16;
+    sprite.fillSprite(TFT_WHITE);
+    drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse_Die, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
+    sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
+  }
 }
 
 void drawImageScaled(TFT_eSprite *targetSprite, const uint16_t *data, int x, int y, int width, int height, int scale, int image_x_offset, int frame_width) {
