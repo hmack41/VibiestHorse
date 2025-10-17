@@ -6,6 +6,7 @@
 #include "grass.h"
 #include "heart.h"
 #include "horseimagedying.h"
+#define VAPE_PIN PA6
 
 // TFT and Sprite objects
 TFT_eSPI tft            = TFT_eSPI();
@@ -37,6 +38,16 @@ const int SCALED_SPRITE_WIDTH_RUN = HORSE_FRAME_WIDTH_RUN_MINI * SCALE;
 const int SCALED_SPRITE_HEIGHT = (HORSE_SHEET_HEIGHT) * SCALE;
 const int HORSE_PRINT_HEIGHT = 180;
 
+const int x1    = 45;
+const int x2    = 85;
+const int x3    = 125;
+const int x4    = 165;
+const int s1    = 0;
+const int s2    = 15;
+const int s3    = 30;
+const int yall  = 100;
+
+
 // text definitions
 const int vhwid = 39;
 const int vhhei = 15;
@@ -48,11 +59,19 @@ const int scaledvhhei = vhhei*vhsca;
 const int gwid  = 240;
 const int ghei  = 110;
 
-
 int anim_frame = 0;
 int frame = 0;
-int health = 55;
-int L_death_anim = 0;
+int health = 75;
+int death_flag = 0;
+
+// Vape measurement parameters
+float current_voltage = 10;
+const float VREF = 3.3;     // ADC reference voltage
+const int ADC_MAX = 4095;   // 12-bit ADC
+const float DIVIDER = 2.0;  // Adjust for your resistor divider ratio
+const float THRESHOLD = .975; // Trigger when battery < threshold
+char buffer[20];
+
 void setup(){
 
   tft.init();
@@ -71,7 +90,7 @@ void setup(){
 
   // tft.fillScreen(TFT_WHITE);
   tft.setTextColor(TFT_WHITE, TFT_BLACK); 
-  tft.setTextSize(2); 
+  tft.setTextSize(1); 
   tft.setCursor(10, 10);
   tft.setSwapBytes(true);  
   tft.pushImage(0,210,gwid,ghei,epd_grass);
@@ -84,9 +103,20 @@ void setup(){
   runsprite.createSprite(SCALED_SPRITE_WIDTH_RUN,SCALED_SPRITE_HEIGHT);
   runsprite.setSwapBytes(true);
   heart1.createSprite(SCALED_HEART_WIDTH,SCALED_HEART_HEIGHT);
+  drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 0, HEART_SHEET_WIDTH);
+  heart1.pushSprite(x1,yall,TFT_WHITE);
+  drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 0, HEART_SHEET_WIDTH);
+  heart1.pushSprite(x2,yall,TFT_WHITE);
+  drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 0, HEART_SHEET_WIDTH);
+  heart1.pushSprite(x3,yall,TFT_WHITE);
+  drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 0, HEART_SHEET_WIDTH);
+  heart1.pushSprite(x4,yall,TFT_WHITE);
 }
 
 void loop(){
+  current_voltage = readBatteryVoltage();
+  // dtostrf(current_voltage, 5, 4, buffer); // 5 is the total width, 2 is precision
+  // tft.print(buffer);
   decrement_health();
   play_animation();
   frame++;
@@ -94,29 +124,38 @@ void loop(){
   delay(150);
 }
 
+float readBatteryVoltage() {
+  int adcValue = analogRead(VAPE_PIN);
+  float vMeasured = (adcValue * VREF) / ADC_MAX;
+  return vMeasured * DIVIDER;  // actual battery voltage
+}
+
 void decrement_health(){
   if(health >0){
-  health = health -1;
-  }
+    health = health -1;
+    }
   else if (health == 1){
-    L_death_anim = 1;
+    death_flag = 1;
   }
 }
 
 
 void play_animation(){
-  if(health > 50){
+  if(health == 2){
+    death_flag = 1;
+  }
+  if(health > 50 && health > 2){
     run_animation();
   }
-  else if(health < 50 && health > 0){
-    walk_animation();
-  }
-  else if(L_death_anim == 1){
-    death_animation();
-  }
+  else if(health < 50 && health > 1){
+      walk_animation();
+    }
+  else if(health < 2){
+      death_animation();
+    }
   if(health ==50){
-    erase_sprites();
-  }
+      erase_sprites();
+    }
   }
 
   void walk_animation(){
@@ -130,7 +169,10 @@ void play_animation(){
 }
 
 void erase_sprites(){
-  //erase the sprites;
+  runsprite.fillSprite(TFT_WHITE);
+  sprite.fillSprite(TFT_WHITE);
+  runsprite.pushSprite(45, HORSE_PRINT_HEIGHT);
+  sprite.pushSprite(75,HORSE_PRINT_HEIGHT);
 }
 
 void run_animation(){
@@ -143,25 +185,22 @@ void run_animation(){
 }
 
 void death_animation(){
-  for (int i = 0; i <=8; i++){
-    anim_frame = i;
-    int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
-    image_x_offset += 16;
-    sprite.fillSprite(TFT_WHITE);
-    drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse_Die, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
-    sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
+  while(death_flag != 0){
+    for (int i = 0; i <=7; i++){
+      anim_frame = i;
+      int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
+      image_x_offset += 16;
+      sprite.fillSprite(TFT_WHITE);
+      drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse_Die, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
+      sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
+      delay(200);
+    }
+    death_flag = 0;
   }
+
 }
 
 void draw_heart(int health){
-  int x1    = 45;
-  int x2    = 85;
-  int x3    = 125;
-  int x4    = 165;
-  int s1    = 0;
-  int s2    = 15;
-  int s3    = 30;
-  int yall  = 100;
   // Heart 1
   if (health == 0){
       drawImageScaled(&heart1, epd_bitmap_heart, 0, 0, HEART_SHEET_WIDTH, HEART_SHEET_HEIGHT, HEART_SCALE, 30, HEART_SHEET_WIDTH);
