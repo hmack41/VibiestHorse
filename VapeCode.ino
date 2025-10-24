@@ -28,16 +28,17 @@ const int SCALED_HEART_HEIGHT = HEART_SHEET_HEIGHT * HEART_SCALE;
 // Image and animation frame definitions
 const int HORSE_SHEET_WIDTH = 512;
 const int HORSE_RUN_SHEET_WIDTH = 384;
-const int HORSE_SHEET_HEIGHT = 36;
+const int HORSE_SHEET_HEIGHT = 43;
 const int HORSE_FRAME_WIDTH = 64;  // Each frame of the horse is 64 pixels wide
-const int HORSE_FRAME_WIDTH_MINI = 36;
+const int HORSE_FRAME_WIDTH_MINI = 43;
 const int HORSE_FRAME_WIDTH_RUN_MINI = 50;
 const int SCALE = 3;
 const int ANIM_FRAME_COUNT = 8;  // Total animation frames
 const int SCALED_SPRITE_WIDTH = HORSE_FRAME_WIDTH_MINI * SCALE;
 const int SCALED_SPRITE_WIDTH_RUN = HORSE_FRAME_WIDTH_RUN_MINI * SCALE;
 const int SCALED_SPRITE_HEIGHT = (HORSE_SHEET_HEIGHT)*SCALE;
-const int HORSE_PRINT_HEIGHT = 180;
+const int HORSE_PRINT_HEIGHT = 160;
+const int HORSE_PRINT_XLOC  = 45;
 
 const int x1 = 45;
 const int x2 = 85;
@@ -79,7 +80,7 @@ void setup() {
   tft.setRotation(270);
   ///////////// CREATE THE SKY ////////////////////
   int half_height = tft.height() / 2;
-  uint16_t light_blue_top = tft.color565(67, 184, 239);
+  uint16_t light_blue_top = tft.color565(242, 161, 201);
   uint16_t white_bottom = TFT_WHITE;
   tft.fillRect(0, half_height, tft.width(), tft.height() - half_height, white_bottom);
   tft.fillRectVGradient(0, 0, tft.width(), half_height, light_blue_top, white_bottom);
@@ -109,7 +110,7 @@ void setup() {
   tft.setTextColor(TFT_BLACK, TFT_WHITE);
   tft.setTextSize(1);
   tft.setCursor(10, 10);
-  THRESHOLD = readBatteryVoltage() - .01;
+  THRESHOLD = readBatteryVoltage() - .002;
   dtostrf(THRESHOLD, 5, 4, buffer);  // 5 is the total width, 2 is precision
   tft.print(buffer);
 }
@@ -175,26 +176,26 @@ void walk_animation() {
   anim_frame = frame % 8;
   // int anim_frame = (ANIM_FRAME_COUNT - 1) - (frame % ANIM_FRAME_COUNT);
   int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
-  image_x_offset += 16;
+  image_x_offset += 5;
   sprite.fillSprite(TFT_WHITE);
   drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
-  sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
+  sprite.pushSprite(HORSE_PRINT_XLOC, HORSE_PRINT_HEIGHT);
 }
 
 void erase_sprites() {
   runsprite.fillSprite(TFT_WHITE);
   sprite.fillSprite(TFT_WHITE);
-  runsprite.pushSprite(45, HORSE_PRINT_HEIGHT);
-  sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
+  runsprite.pushSprite(HORSE_PRINT_XLOC, HORSE_PRINT_HEIGHT);
+  sprite.pushSprite(HORSE_PRINT_XLOC, HORSE_PRINT_HEIGHT);
 }
 
 void run_animation() {
   anim_frame = frame % 6;
   int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
-  image_x_offset += 10;
+  image_x_offset += 5;
   runsprite.fillSprite(TFT_WHITE);
   drawImageScaled(&runsprite, epd_bitmap_Light_Blue_Horse_Run, 0, 0, HORSE_RUN_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_RUN_MINI);
-  runsprite.pushSprite(45, HORSE_PRINT_HEIGHT);
+  runsprite.pushSprite(HORSE_PRINT_XLOC, HORSE_PRINT_HEIGHT);
 }
 
 void death_animation() {
@@ -202,10 +203,10 @@ void death_animation() {
     for (int i = 0; i <= 7; i++) {
       anim_frame = i;
       int image_x_offset = ((anim_frame * HORSE_FRAME_WIDTH));
-      image_x_offset += 16;
+      image_x_offset += 5;
       sprite.fillSprite(TFT_WHITE);
       drawImageScaled(&sprite, epd_bitmap_Light_Blue_Horse_Die, 0, 0, HORSE_SHEET_WIDTH, HORSE_SHEET_HEIGHT, SCALE, image_x_offset, HORSE_FRAME_WIDTH_MINI);
-      sprite.pushSprite(75, HORSE_PRINT_HEIGHT);
+      sprite.pushSprite(HORSE_PRINT_XLOC, HORSE_PRINT_HEIGHT);
       delay(200);
     }
     death_flag = 0;
@@ -270,12 +271,21 @@ void draw_heart(int health) {
 
 
 void drawImageScaled(TFT_eSprite *targetSprite, const uint16_t *data, int x, int y, int width, int height, int scale, int image_x_offset, int frame_width) {
+  // Define 0x0000 as the transparent color
+  const uint16_t transparent_color = 0x0000; 
+
   for (int j = 0; j < height; j++) {
     for (int i = 0; i < frame_width; i++) {
       uint16_t color = data[j * width + (i + image_x_offset)];
-
-      // Draw a filled rectangle of the size specified by the 'scale' factor
-      targetSprite->fillRect(x + i * scale, y + j * scale, scale, scale, color);
+      
+      // Check if the pixel's color is the transparent color (0x0000)
+      if (color == transparent_color) {
+        // If it is, replace it with white
+        targetSprite->fillRect(x + i * scale, y + j * scale, scale, scale, TFT_WHITE);
+      } else {
+        // Otherwise, draw the original color
+        targetSprite->fillRect(x + i * scale, y + j * scale, scale, scale, color);
+      }
     }
   }
 }
