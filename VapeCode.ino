@@ -16,7 +16,6 @@ TFT_eSprite runsprite = TFT_eSprite(&tft);
 TFT_eSprite text_sprite = TFT_eSprite(&tft);  // Used for the text
 TFT_eSprite heart1 = TFT_eSprite(&tft);
 
-
 // Hearts
 const int HEART_SHEET_WIDTH = 45;
 const int HEART_SHEET_HEIGHT = 13;
@@ -79,7 +78,7 @@ void setup() {
   tft.setRotation(270);
   ///////////// CREATE THE SKY ////////////////////
   int half_height = tft.height() / 2;
-  uint16_t light_blue_top = tft.color565(67, 184, 239);
+  uint16_t light_blue_top = tft.color565(242, 161, 201);
   uint16_t white_bottom = TFT_WHITE;
   tft.fillRect(0, half_height, tft.width(), tft.height() - half_height, white_bottom);
   tft.fillRectVGradient(0, 0, tft.width(), half_height, light_blue_top, white_bottom);
@@ -109,7 +108,7 @@ void setup() {
   tft.setTextColor(TFT_BLACK, TFT_WHITE);
   tft.setTextSize(1);
   tft.setCursor(10, 10);
-  THRESHOLD = readBatteryVoltage() - .01;
+  THRESHOLD = readBatteryVoltage() + .1;
   dtostrf(THRESHOLD, 5, 4, buffer);  // 5 is the total width, 2 is precision
   tft.print(buffer);
 }
@@ -128,7 +127,7 @@ void loop() {
 }
 
 void check_battery_voltage() {
-  if (current_voltage < THRESHOLD) {
+  if (current_voltage > THRESHOLD) {
     digitalWrite(LED_PIN, LOW);  // LED ON (active low)
     health = health + 5;
     if (health > 100) {
